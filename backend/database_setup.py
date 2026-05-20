@@ -1,12 +1,13 @@
-from typing import  Optional, List
+import os
+from typing import Optional, List
 from sqlmodel import Field, Relationship, SQLModel, create_engine, Session, select
 from passlib.context import CryptContext
-#Tablas modelos
+# Tablas modelos
 class User(SQLModel, table=True): #tabla para manejar el acceso al sistema
     id: Optional[int] = Field(default=None, primary_key=True)
     username: str = Field(index=True, unique=True)
     password_hash: str
-    role: str # estos seran los roles 'admin' o 'user', 'estudiante'
+    role: str # estos serán los roles 'maestro' o 'estudiante'
     
 class Student(SQLModel, table=True): #tabla para manejar la informacion de los estudiantes
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -28,34 +29,17 @@ class Teacher(SQLModel, table=True): #tabla para manejar la informacion de los m
     specialty: str
     user_id: Optional[int] =Field(default=None, foreign_key= "user.id") #relacion con la tabla de usuarios
     
-#Crear la base de datos y las tablas con sus llaves primarias y foraneas
-sqlite_url = "sqlite:///colegio.db"
+# Crear la base de datos y las tablas con sus llaves primarias y foraneas
+sqlite_url = os.getenv("COLEGIO_DB_URL", "sqlite:///colegio.db")
 engine = create_engine(sqlite_url, echo=True)
-#Se lee todos los modelos 
+# Se lee todos los modelos
 def crear_bd_and_tables():
     SQLModel.metadata.create_all(engine)
     print("***¡Base de datos y tablas creadas exitosamente!***")
    
-#se añaden un usuario administrador 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-def create_admin():
-    with Session(engine) as session:
-        # verificar si el usuario admin ya existe
-        statement = select(User).where(User.username == "admin")
-        admin_exists = session.exec(statement).first()
-        
-        if not admin_exists:
-            admin_user = User(
-                username="admin",
-                password_hash=pwd_context.hash("andres123"),
-                role="admin"
-            )
-            session.add(admin_user)
-            session.commit()
-            print("*** ¡Usuario admin creado exitosamente! ***")
-            
-    #crear estudiantes 
+#crear estudiantes 
 def create_students():
     with Session(engine) as session:
         #verificar si el estudiante ya existe para evitar duplicados
@@ -153,10 +137,9 @@ def create_grades():
     add_grade_by_teacher("mariarodriguez", "juanperez", "Física", 8.7)
     add_grade_by_teacher("mariarodriguez", "juanperez", "Química", 9.0)
 
-# ejecutar la función para crear el admin y el estudiante
+# ejecutar la función para crear los datos iniciales
 if __name__ == "__main__":    
     crear_bd_and_tables()
-    create_admin()
     create_students()
     create_teachers()
     create_grades()
