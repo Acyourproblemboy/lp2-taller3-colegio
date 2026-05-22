@@ -30,7 +30,7 @@ class Teacher(SQLModel, table=True): #tabla para manejar la informacion de los m
     user_id: Optional[int] =Field(default=None, foreign_key= "user.id") #relacion con la tabla de usuarios
     
 # Crear la base de datos y las tablas con sus llaves primarias y foraneas
-sqlite_url = os.getenv("COLEGIO_DB_URL", "sqlite:///colegio.db")
+sqlite_url = os.getenv("COLEGIO_DB_URL", "sqlite:///backend/colegio.db")
 engine = create_engine(sqlite_url, echo=True)
 # Se lee todos los modelos
 def crear_bd_and_tables():

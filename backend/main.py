@@ -167,7 +167,6 @@ def create_grade(payload: CreateGradeRequest, session: Session = Depends(get_ses
     session.refresh(grade)
     return grade
 
-
 @app.get("/grades/student/{student_username}", response_model=List[GradeRead])
 def get_student_grades(student_username: str, session: Session = Depends(get_session)):
     student_user = session.exec(select(User).where(User.username == student_username)).first()
