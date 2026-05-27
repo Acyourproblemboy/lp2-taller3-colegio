@@ -102,3 +102,33 @@ def test_create_grade_and_query(client: TestClient):
     teacher_grades = client.get("/grades/teacher/profesor2")
     assert teacher_grades.status_code == 200
     assert len(teacher_grades.json()) == 1
+
+
+def test_login_success(client: TestClient):
+    response = client.post(
+        "/students",
+        json={
+            "username": "login_estudiante",
+            "password": "clave123",
+            "full_name": "Login Estudiante",
+            "grade": "12vo grado",
+        },
+    )
+    assert response.status_code == 200
+
+    login_response = client.post(
+        "/login",
+        json={"username": "login_estudiante", "password": "clave123"},
+    )
+    assert login_response.status_code == 200
+    result = login_response.json()
+    assert result["username"] == "login_estudiante"
+    assert result["role"] == "estudiante"
+
+
+def test_login_failure(client: TestClient):
+    response = client.post(
+        "/login",
+        json={"username": "usuario_inexistente", "password": "malaclave"},
+    )
+    assert response.status_code == 401

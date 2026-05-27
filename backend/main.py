@@ -60,6 +60,20 @@ class CreateGradeRequest(BaseModel):
     score: float
 
 
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+
+class LoginResponse(BaseModel):
+    id: int
+    username: str
+    role: str
+
+    class Config:
+        orm_mode = True
+
+
 def get_session() -> Generator[Session, None, None]:
     with Session(engine) as session:
         yield session
@@ -138,6 +152,12 @@ def create_teacher(payload: CreateTeacherRequest, session: Session = Depends(get
 def list_grades(session: Session = Depends(get_session)):
     grades = session.exec(select(Grade)).all()
     return grades
+@app.post("/login", response_model=LoginResponse)
+def login(payload: LoginRequest, session: Session = Depends(get_session)):
+    user = session.exec(select(User).where(User.username == payload.username)).first()
+    if not user or not pwd_context.verify(payload.password, user.password_hash):
+        raise HTTPException(status_code=401, detail="Usuario o contraseña inválidos")
+    return user
 
 
 @app.post("/grades", response_model=GradeRead)
