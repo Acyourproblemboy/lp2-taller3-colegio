@@ -1,12 +1,22 @@
 from typing import Generator, List, Optional
 
 from fastapi import Depends, FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlmodel import Session, SQLModel, select
 
 from .database_setup import Grade, Student, Teacher, User, crear_bd_and_tables, engine, pwd_context
 
 app = FastAPI(title="Colegio API", version="1.0")
+
+# Add CORS middleware to allow frontend requests
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins for development
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class StudentRead(BaseModel):
     id: int
@@ -152,6 +162,8 @@ def create_teacher(payload: CreateTeacherRequest, session: Session = Depends(get
 def list_grades(session: Session = Depends(get_session)):
     grades = session.exec(select(Grade)).all()
     return grades
+
+
 @app.post("/login", response_model=LoginResponse)
 def login(payload: LoginRequest, session: Session = Depends(get_session)):
     user = session.exec(select(User).where(User.username == payload.username)).first()

@@ -26,10 +26,11 @@ export function LoginForm() {
 
     try {
       const response = await apiLogin(username, password)
-      login(response.user, response.access_token)
+      // Response is LoginResponse: { id, username, role }
+      login(response)
       
       // Redirect based on role
-      if (response.user.role === "maestro") {
+      if (response.role === "maestro") {
         router.push("/dashboard/teacher")
       } else {
         router.push("/dashboard/student")

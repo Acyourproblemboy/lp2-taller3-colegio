@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Search, Mail, GraduationCap } from "lucide-react"
+import { Search, GraduationCap } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -33,7 +33,7 @@ export function TeacherStudents() {
   useEffect(() => {
     const filtered = students.filter(
       (student) =>
-        student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        student.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         student.grade.toLowerCase().includes(searchQuery.toLowerCase())
     )
     setFilteredStudents(filtered)
@@ -84,21 +84,17 @@ export function TeacherStudents() {
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary text-lg font-bold">
-                  {student.name.charAt(0)}
+                  {student.full_name.charAt(0)}
                 </div>
                 <Badge variant="secondary" className="bg-secondary text-secondary-foreground">
                   {student.grade}
                 </Badge>
               </div>
-              <CardTitle className="text-card-foreground mt-3">{student.name}</CardTitle>
+              <CardTitle className="text-card-foreground mt-3">{student.full_name}</CardTitle>
               <CardDescription className="text-muted-foreground">@{student.username}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Mail className="w-4 h-4" />
-                  <span>{student.email}</span>
-                </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <GraduationCap className="w-4 h-4" />
                   <span>{student.grade}</span>

@@ -9,12 +9,18 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { getStudents, createGrade, type Student } from "@/lib/api"
+import { useAuth } from "@/components/auth-provider"
 import { Skeleton } from "@/components/ui/skeleton"
 
 const subjects = ["Matemáticas", "Español", "Ciencias", "Historia", "Inglés", "Educación Física", "Arte", "Música"]
 
+interface StudentWithUsername extends Student {
+  username: string
+}
+
 export function TeacherGrades() {
-  const [students, setStudents] = useState<Student[]>([])
+  const { user } = useAuth()
+  const [students, setStudents] = useState<StudentWithUsername[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [notification, setNotification] = useState<{ type: "success" | "error"; message: string } | null>(null)
@@ -30,7 +36,7 @@ export function TeacherGrades() {
     async function fetchStudents() {
       try {
         const data = await getStudents()
-        setStudents(data)
+        setStudents(data as StudentWithUsername[])
       } catch (error) {
         console.error("Error fetching students:", error)
       } finally {
@@ -47,17 +53,22 @@ export function TeacherGrades() {
     setNotification(null)
 
     try {
+      const selectedStudent = students.find(s => s.id.toString() === formData.student_id)
+      if (!selectedStudent) {
+        throw new Error("Estudiante no encontrado")
+      }
+
       await createGrade({
-        student_id: parseInt(formData.student_id),
+        teacher_username: user?.username || "",
+        student_username: selectedStudent.username,
         subject: formData.subject,
         score: parseFloat(formData.score),
-        comments: formData.comments || undefined,
       })
 
       setNotification({ type: "success", message: "Calificación registrada exitosamente" })
       setFormData({ student_id: "", subject: "", score: "", comments: "" })
-    } catch {
-      setNotification({ type: "error", message: "Error al registrar la calificación" })
+    } catch (error) {
+      setNotification({ type: "error", message: error instanceof Error ? error.message : "Error al registrar la calificación" })
     } finally {
       setIsSubmitting(false)
       setTimeout(() => setNotification(null), 5000)
@@ -125,7 +136,7 @@ export function TeacherGrades() {
                 <SelectContent>
                   {students.map((student) => (
                     <SelectItem key={student.id} value={student.id.toString()}>
-                      {student.name} - {student.grade}
+                      {student.full_name} - {student.grade}
                     </SelectItem>
                   ))}
                 </SelectContent>

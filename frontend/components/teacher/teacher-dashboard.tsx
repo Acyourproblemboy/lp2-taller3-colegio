@@ -92,10 +92,10 @@ function StudentsList({ students }: { students: Student[] }) {
               className="flex items-center gap-3 p-3 rounded-lg bg-secondary/30 border border-border"
             >
               <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-medium">
-                {student.name.charAt(0)}
+                {student.full_name.charAt(0)}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-card-foreground text-sm truncate">{student.name}</p>
+                <p className="font-medium text-card-foreground text-sm truncate">{student.full_name}</p>
                 <p className="text-xs text-muted-foreground">{student.grade}</p>
               </div>
             </div>
